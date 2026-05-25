@@ -27,7 +27,9 @@ NEXT_PUBLIC_URL=http://localhost:3000
 
 **Deployed contract (Base Mainnet):** [0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9](https://basescan.org/address/0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9)
 
-**Builder Code:** `bc_k6hoeukp` — appended to every `tap` / `checkIn` tx calldata for [base.dev](https://base.dev) attribution.
+**Builder Code:** `bc_w6mg1cwt` — appended to every `tap` / `checkIn` tx calldata for [base.dev](https://base.dev) attribution.
+
+Suffix (ERC-8021): `0x62635f77366d67316377740b0080218021802180218021802180218021`
 
 ## Run
 

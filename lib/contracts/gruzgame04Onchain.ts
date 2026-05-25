@@ -3,9 +3,10 @@ export const GRUZGAME04_CONTRACT_ADDRESS =
   "0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9" as const;
 
 export const GRUZGAME04_CHECKIN_PRICE_ETH = "0.00001";
-export const GRUZGAME04_BUILDER_CODE = "bc_k6hoeukp";
+/** From base.dev → Settings → Builder Codes (gruzgame04) */
+export const GRUZGAME04_BUILDER_CODE = "bc_w6mg1cwt";
 export const GRUZGAME04_BUILDER_CODE_DATA_SUFFIX =
-  "0x62635f6b36686f65756b700b0080218021802180218021802180218021" as const;
+  "0x62635f77366d67316377740b0080218021802180218021802180218021" as const;
 
 export const gruzGame04OnchainAbi = [
   {

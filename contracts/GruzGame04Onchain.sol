@@ -6,9 +6,9 @@ contract GruzGame04Onchain {
     uint256 public constant CHECKIN_PRICE = 0.00001 ether;
     uint256 public constant BPS_DENOMINATOR = 10_000;
     uint256 public constant STREAK_BONUS_BPS = 1_000;
-    string public constant BASE_BUILDER_CODE = "bc_k6hoeukp";
+    string public constant BASE_BUILDER_CODE = "bc_w6mg1cwt";
     bytes public constant BASE_BUILDER_CODE_DATA_SUFFIX =
-        hex"62635f6b36686f65756b700b0080218021802180218021802180218021";
+        hex"62635f77366d67316377740b0080218021802180218021802180218021";
 
     address public owner;
 
