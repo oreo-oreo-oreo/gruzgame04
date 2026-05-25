@@ -18,7 +18,12 @@ Copy `.example.env` to `.env.local`:
 ```bash
 NEXT_PUBLIC_URL=http://localhost:3000
 BASE_RPC_URL=https://mainnet.base.org
+NEXT_PUBLIC_GRUZGAME04_CONTRACT_ADDRESS=0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9
 ```
+
+**Deployed contract (Base Mainnet):** [0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9](https://basescan.org/address/0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9)
+
+**Builder Code:** `bc_k6hoeukp` — appended to every `tap` / `checkIn` tx calldata for [base.dev](https://base.dev) attribution (works from website + Base App).
 
 ## Run
 

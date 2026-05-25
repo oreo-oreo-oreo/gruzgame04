@@ -13,7 +13,7 @@ const config = createConfig({
     injected({ target: "metaMask" }),
     injected(),
     baseAccount({
-      appName: "Gruz Game 04",
+      appName: "Pirate Cannon Tap",
     }),
   ],
   storage: createStorage({ storage: cookieStorage }),
