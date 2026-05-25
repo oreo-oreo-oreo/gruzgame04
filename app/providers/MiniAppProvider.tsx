@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import sdk from '@farcaster/miniapp-sdk';
@@ -8,14 +8,24 @@ interface MiniAppContextValue {
   isReady: boolean;
 }
 
-export const MiniAppContext = createContext<MiniAppContextValue | null>(null);
+export const MiniAppContext = createContext<MiniAppContextValue>({
+  context: null,
+  isReady: false,
+});
 
 export function useMiniApp() {
-  const context = useContext(MiniAppContext);
-  if (!context) {
-    throw new Error('useMiniApp must be used within MiniAppProvider');
+  return useContext(MiniAppContext);
+}
+
+async function signalMiniAppReady() {
+  try {
+    const isInApp = await sdk.isInMiniApp();
+    if (isInApp) {
+      await sdk.actions.ready();
+    }
+  } catch {
+    // Safe no-op outside Base App or if host is not ready yet.
   }
-  return context;
 }
 
 export function MiniAppProvider({ children }: { children: ReactNode }) {
@@ -24,15 +34,27 @@ export function MiniAppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const init = async () => {
-      const isInApp = await sdk.isInMiniApp();
-      if (isInApp) {
-        const ctx = await sdk.context;
-        setContext(ctx);
-        await sdk.actions.ready();
+      try {
+        const isInApp = await sdk.isInMiniApp();
+        if (isInApp) {
+          setContext(await sdk.context);
+        }
+        await signalMiniAppReady();
+      } finally {
         setIsReady(true);
       }
     };
-    init();
+
+    void init();
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        void signalMiniAppReady();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
 
   return (

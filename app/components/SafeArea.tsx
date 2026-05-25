@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useMiniApp } from '@/app/providers/MiniAppProvider';
 import { ReactNode } from 'react';
@@ -11,7 +11,6 @@ interface SafeAreaProps {
 export function SafeArea({ children, className }: SafeAreaProps) {
   const { context, isReady } = useMiniApp();
 
-  // Only apply insets when running inside a mini app
   if (!isReady || !context) {
     return <div className={className}>{children}</div>;
   }

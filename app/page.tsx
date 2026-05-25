@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMiniApp } from "./providers/MiniAppProvider";
 import { encodeFunctionData, parseEther } from "viem";
 import { base } from "wagmi/chains";
@@ -102,11 +102,23 @@ export default function Home() {
 
   const { connectAsync, connectors, isPending: isConnectPending } = useConnect();
   const { disconnect } = useDisconnect();
-  const { data: txHash, isPending: isWritePending, sendTransactionAsync } = useSendTransaction();
-  const { isLoading: isTxMining, isSuccess: isTxMined } = useWaitForTransactionReceipt({
+  const {
+    data: txHash,
+    isPending: isWritePending,
+    sendTransactionAsync,
+    reset: resetSendTransaction,
+  } = useSendTransaction();
+  const {
+    isLoading: isTxMining,
+    isSuccess: isTxMined,
+    isError: isTxFailed,
+  } = useWaitForTransactionReceipt({
     hash: txHash,
     query: { enabled: Boolean(txHash) },
   });
+
+  const pendingActionRef = useRef<"tap" | "checkin" | null>(null);
+  const processedTxHashRef = useRef<string | null>(null);
 
   const walletConnectors = useMemo(
     () =>
@@ -116,7 +128,8 @@ export default function Home() {
           name.includes("rabby") ||
           name.includes("metamask") ||
           name.includes("injected") ||
-          name.includes("base")
+          name.includes("base") ||
+          name.includes("farcaster")
         );
       }),
     [connectors],
@@ -204,60 +217,94 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [fetchState]);
 
-  useEffect(() => {
-    const refreshAfterTx = async () => {
-      if (!isTxMined || !isSubmittingCheckin || !address) return;
-      const players = parsePlayers();
-      const key = address.toLowerCase();
-      const currentSlot = getCurrentCheckinSlot();
-      const previousSlot = currentSlot - 1;
-      const player = players[key] ?? {
-        score: 0,
-        streak: 0,
-        lastCheckinSlot: null,
-        totalCheckins: 0,
-      };
+  const finalizeTransaction = useCallback(
+    async (hash: string, action: "tap" | "checkin") => {
+      if (!address) return;
 
-      if (player.lastCheckinSlot !== currentSlot) {
-        const nextStreak = player.lastCheckinSlot === previousSlot ? player.streak + 1 : 1;
-        players[key] = {
-          ...player,
-          streak: nextStreak,
-          lastCheckinSlot: currentSlot,
-          totalCheckins: player.totalCheckins + 1,
-        };
-        savePlayers(players);
+      try {
+        if (action === "checkin") {
+          const players = parsePlayers();
+          const key = address.toLowerCase();
+          const currentSlot = getCurrentCheckinSlot();
+          const previousSlot = currentSlot - 1;
+          const player = players[key] ?? {
+            score: 0,
+            streak: 0,
+            lastCheckinSlot: null,
+            totalCheckins: 0,
+          };
+
+          if (player.lastCheckinSlot !== currentSlot) {
+            const nextStreak = player.lastCheckinSlot === previousSlot ? player.streak + 1 : 1;
+            players[key] = {
+              ...player,
+              streak: nextStreak,
+              lastCheckinSlot: currentSlot,
+              totalCheckins: player.totalCheckins + 1,
+            };
+            savePlayers(players);
+          }
+        }
+
+        if (action === "tap") {
+          const players = parsePlayers();
+          const key = address.toLowerCase();
+          const player = players[key] ?? {
+            score: 0,
+            streak: 0,
+            lastCheckinSlot: null,
+            totalCheckins: 0,
+          };
+          const tapsToApply = pendingTaps;
+          if (tapsToApply > 0) {
+            const tapPoints = tapsToApply * (1 + player.streak * 0.1);
+            players[key] = {
+              ...player,
+              score: Number((player.score + tapPoints).toFixed(2)),
+            };
+            savePlayers(players);
+            setPendingTaps(0);
+          }
+        }
+
+        await fetchState();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Ошибка обновления состояния после транзакции.");
+      } finally {
+        setIsSubmittingCheckin(false);
+        setIsSubmittingTap(false);
+        pendingActionRef.current = null;
+        processedTxHashRef.current = hash;
+        resetSendTransaction();
       }
-
-      setIsSubmittingCheckin(false);
-      await fetchState();
-    };
-    void refreshAfterTx();
-  }, [address, fetchState, isSubmittingCheckin, isTxMined]);
+    },
+    [address, fetchState, pendingTaps, resetSendTransaction],
+  );
 
   useEffect(() => {
-    const refreshAfterTapTx = async () => {
-      if (!isTxMined || !isSubmittingTap || !address || pendingTaps <= 0) return;
-      const players = parsePlayers();
-      const key = address.toLowerCase();
-      const player = players[key] ?? {
-        score: 0,
-        streak: 0,
-        lastCheckinSlot: null,
-        totalCheckins: 0,
-      };
-      const tapPoints = pendingTaps * (1 + player.streak * 0.1);
-      players[key] = {
-        ...player,
-        score: Number((player.score + tapPoints).toFixed(2)),
-      };
-      savePlayers(players);
-      setPendingTaps(0);
+    if (!txHash || processedTxHashRef.current === txHash) return;
+
+    if (isTxFailed) {
+      processedTxHashRef.current = txHash;
+      setIsSubmittingCheckin(false);
       setIsSubmittingTap(false);
-      await fetchState();
-    };
-    void refreshAfterTapTx();
-  }, [address, fetchState, isSubmittingTap, isTxMined, pendingTaps]);
+      pendingActionRef.current = null;
+      resetSendTransaction();
+      setError("Транзакция не подтвердилась в сети. Попробуйте ещё раз.");
+      return;
+    }
+
+    if (!isTxMined) return;
+
+    const action = pendingActionRef.current;
+    if (!action) {
+      processedTxHashRef.current = txHash;
+      resetSendTransaction();
+      return;
+    }
+
+    void finalizeTransaction(txHash, action);
+  }, [finalizeTransaction, isTxFailed, isTxMined, resetSendTransaction, txHash]);
 
   const handleTap = () => {
     if (!state || !address || !isCorrectChain || isBusy) return;
@@ -284,6 +331,8 @@ export default function Home() {
     if (!address || !isCorrectChain || pendingTaps <= 0) return;
     setError("");
     try {
+      processedTxHashRef.current = null;
+      pendingActionRef.current = "tap";
       setIsSubmittingTap(true);
       const data = withGruzGame04BuilderCodeDataSuffix(
         encodeFunctionData({
@@ -299,7 +348,9 @@ export default function Home() {
         chainId: base.id,
       });
     } catch (err) {
+      pendingActionRef.current = null;
       setIsSubmittingTap(false);
+      resetSendTransaction();
       setError(err instanceof Error ? err.message : "Не удалось отправить onchain транзакцию для тапов.");
     }
   };
@@ -308,6 +359,8 @@ export default function Home() {
     if (!address || !state?.canCheckinNow) return;
     setError("");
     try {
+      processedTxHashRef.current = null;
+      pendingActionRef.current = "checkin";
       setIsSubmittingCheckin(true);
       const data = withGruzGame04BuilderCodeDataSuffix(
         encodeFunctionData({
@@ -322,7 +375,9 @@ export default function Home() {
         chainId: base.id,
       });
     } catch (err) {
+      pendingActionRef.current = null;
       setIsSubmittingCheckin(false);
+      resetSendTransaction();
       setError(err instanceof Error ? err.message : "Не удалось отправить ончейн check-in транзакцию.");
     }
   };
