@@ -16,14 +16,18 @@ Based on the [Build an app on Base](https://docs.base.org/apps/quickstart/build-
 Copy `.example.env` to `.env.local`:
 
 ```bash
+# optional — only for localhost override
 NEXT_PUBLIC_URL=http://localhost:3000
-BASE_RPC_URL=https://mainnet.base.org
-NEXT_PUBLIC_GRUZGAME04_CONTRACT_ADDRESS=0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9
 ```
+
+**Vercel:** no manual env required (same as gruzgame02 / gamegruz1).
+
+- Site URL: auto from `VERCEL_PROJECT_PRODUCTION_URL` / `VERCEL_URL` via `lib/siteUrl.ts`
+- Contract address: hardcoded in `lib/contracts/gruzgame04Onchain.ts`
 
 **Deployed contract (Base Mainnet):** [0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9](https://basescan.org/address/0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9)
 
-**Builder Code:** `bc_k6hoeukp` — appended to every `tap` / `checkIn` tx calldata for [base.dev](https://base.dev) attribution (works from website + Base App).
+**Builder Code:** `bc_k6hoeukp` — appended to every `tap` / `checkIn` tx calldata for [base.dev](https://base.dev) attribution.
 
 ## Run
 

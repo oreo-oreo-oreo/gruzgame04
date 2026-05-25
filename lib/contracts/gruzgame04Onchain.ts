@@ -1,7 +1,6 @@
 /** Deployed on Base Mainnet — https://basescan.org/address/0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9 */
 export const GRUZGAME04_CONTRACT_ADDRESS =
-  (process.env.NEXT_PUBLIC_GRUZGAME04_CONTRACT_ADDRESS as `0x${string}` | undefined) ??
-  ("0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9" as const);
+  "0x9ABF08d1C298Ada4FC0E8FEB1a71b2FbFBf10fd9" as const;
 
 export const GRUZGAME04_CHECKIN_PRICE_ETH = "0.00001";
 export const GRUZGAME04_BUILDER_CODE = "bc_k6hoeukp";
