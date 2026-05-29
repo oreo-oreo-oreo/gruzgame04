@@ -43,6 +43,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+          <head>
+      <meta
+        name="talentapp:project_verification"
+        content="454d7ffe1cf460a8a395cb89bbdcdce87c342016257d5a7fcc1d9f583c1dc55c2fbb71aab8b617eb18a195f954c87bace4c2399093eaba6086dacfd0ad9fab78"
+      />
+    </head>
       <body className={`${inter.variable} ${sourceCodePro.variable}`} suppressHydrationWarning>
         <Providers>
           <SafeArea>{children}</SafeArea>
