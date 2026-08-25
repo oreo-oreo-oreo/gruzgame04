@@ -1,4 +1,4 @@
-# Gruz Game 04
+# Gruz Game 04x
 
 Base App mini app scaffold (Next.js + wagmi + Farcaster Mini App SDK).
 
