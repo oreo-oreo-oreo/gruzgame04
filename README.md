@@ -4,7 +4,7 @@ Base App mini app scaffold (Next.js + wagmi + Farcaster Mini App SDK).
 
 Based on the [Build an app on Base](https://docs.base.org/apps/quickstart/build-app) guide and the shared structure from `gruzgame03`, without game-specific logic or deployed contract addresses.
 
-## Stack
+## Stackbz
 
 - Next.js App Router
 - wagmi + viem (`base` mainnet)
