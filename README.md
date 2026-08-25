@@ -36,7 +36,7 @@ Suffix (ERC-8021): `0x62635f77366d67316377740b0080218021802180218021802180218021
 ```bash
 npm install
 npm run dev
-```
+```wge
 
 ## Next steps
 
