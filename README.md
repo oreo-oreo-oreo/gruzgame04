@@ -58,3 +58,4 @@ git config gpg.format ssh
 git config user.signingkey ~/.ssh/id_ed25519_oreo_oreo_oreo_signing.pub
 git config commit.gpgsign true
 ```
+n
